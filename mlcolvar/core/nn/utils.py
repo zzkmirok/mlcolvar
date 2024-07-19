@@ -10,7 +10,7 @@ class Shifted_Softplus(torch.nn.Softplus):
         super(Shifted_Softplus, self).__init__(beta, threshold)
 
     def forward(self, input):
-        sp0 = F.softplus(torch.zeros(1), self.beta, self.threshold).item()
+        sp0 = F.softplus(torch.zeros(1), self.beta, self.threshold)
         return F.softplus(input, self.beta, self.threshold) - sp0
     
 class Custom_Sigmoid(torch.nn.Module):

@@ -100,6 +100,7 @@ class DictLoader:
         dataset: Union[dict, DictDataset, Subset, Sequence],
         batch_size: Union[int, Sequence[int]] = 0,
         shuffle: bool = True,
+        drop_last: bool = True
     ):
         """Initialize a ``DictLoader``.
 
@@ -121,9 +122,9 @@ class DictLoader:
         # This checks that dataset and batch_size are consistent.
         self._dataset = None
         self._batch_size = None
+        self.drop_last = drop_last
         self.set_dataset_and_batch_size(dataset=dataset, batch_size=batch_size)
         self.shuffle = shuffle
-
         # These are lazily initialized in __iter__().
         self.indices = None
         self.current_batch_idx = None
@@ -227,9 +228,18 @@ class DictLoader:
                 )
 
             # The number of batches per epoch must be the same for all datasets.
-            n_batches = [
-                math.ceil(dl / b) for dl, b in zip(self.dataset_len, self.batch_size)
+            if not self.drop_last:
+                n_batches = [
+                    math.ceil(dl / b) for dl, b in zip(self.dataset_len, self.batch_size)
+                ]
+            else:
+                n_batches = [
+                math.floor(dl / b) for dl, b in zip(self.dataset_len, self.batch_size)
             ]
+
+            print(f"dataset_len is {self.dataset_len}")
+            print(f"batch_size is {self.batch_size}")
+            print(f"n_batches is {n_batches}")
             if len(set(n_batches)) > 1:
                 self._dataset = old_dataset
                 self._batch_size = old_batch_size
@@ -255,7 +265,6 @@ class DictLoader:
     def __next__(self):
         if self.current_batch_idx >= len(self):
             raise StopIteration
-
         if self.has_multiple_datasets:
             batch = {}
             for dataset_idx in range(len(self.dataset)):
@@ -264,8 +273,8 @@ class DictLoader:
                 )
         else:
             batch = self._get_batch()
-
         self.current_batch_idx += 1
+
         return batch
 
     def __len__(self):
@@ -277,7 +286,10 @@ class DictLoader:
         else:
             dataset_len = self.dataset_len
             batch_size = self.batch_size
-        return (dataset_len + batch_size - 1) // batch_size
+        if not self.drop_last:
+            return (dataset_len + batch_size - 1) // batch_size
+        else:
+            return dataset_len // batch_size
 
     def __repr__(self) -> str:
         string = f"DictLoader(length={self.dataset_len}, batch_size={self.batch_size}, shuffle={self.shuffle})"
@@ -335,8 +347,9 @@ class DictLoader:
 
         # Determine start and end sample indices.
         start = self.current_batch_idx * batch_size
-        end = start + batch_size
-
+        end = min(start + batch_size, len(dataset))
+        if self.drop_last and end - start < batch_size:
+            raise StopIteration        
         # Handle shuffling.
         if self.indices is None:
             batch = dataset[start:end]
