@@ -11,7 +11,9 @@ Machine Learning Collective Variables for Enhanced Sampling
 **PAPER** [![paper](https://img.shields.io/badge/JCP-10.1063/5.0156343-blue)](https://doi.org/10.1063/5.0156343)
 [![preprint](https://img.shields.io/badge/arXiv-2305.19980-lightblue)](https://arxiv.org/abs/2305.19980)
 
-The documentation is available here: https://mlcolvar.readthedocs.io
+The documentation is available at:
+- **stable** version: https://mlcolvar.readthedocs.io
+- **latest** version: https://mlcolvar.readthedocs.io/en/latest/
 
 ---
 
@@ -57,7 +59,7 @@ pip -e install .
 
 ---
 
-**PLUMED interface**: the resulting CVs can be deployed for enhancing sampling with the [PLUMED](https://www.plumed.org/) package via the [pytorch](https://www.plumed.org/doc-master/user-doc/html/_p_y_t_o_r_c_h__m_o_d_e_l.html>`_) interface, available since version 2.9. 
+**PLUMED interface**: the resulting CVs can be deployed for enhancing sampling with the [PLUMED](https://www.plumed.org/) package via the [pytorch](https://www.plumed.org/doc-master/user-doc/html/PYTORCH_MODEL/) interface, available since version 2.9. 
 
 ---
 
